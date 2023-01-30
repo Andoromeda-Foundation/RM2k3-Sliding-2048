@@ -8,6 +8,10 @@
 *~
 *.orig
 *.bak
+*.obj
+*.tlog
+
+
 
 # autotools
 /autom4te.cache/
@@ -102,6 +106,7 @@ __MACOSX
 /*.xcodeproj
 /*.xcworkspace
 /Debug/
+/x64
 /Release/
 /MinSizeRel/
 /RelWithDebInfo/
@@ -144,3 +149,9 @@ eboot.bin
 *.pem
 *.keystore
 *.jks
+EasyRPG_Player_exe.dir/Debug/player.res
+EasyRPG_Player_exe.dir/Debug/Player.exe.recipe
+EasyRPG_Player.sln
+EasyRPG_Player.dir/Debug/EasyRPG_Playerd.lib.recipe
+resources/windows/player.rc
+EasyRPG_Player.dir/Debug/EasyRPG_Player.lib.recipe
