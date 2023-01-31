@@ -64,7 +64,7 @@ int PendingMessage::PushLine(std::string msg) {
 		for (;offset>0;--offset) {
 			cur += msg[++i];
 		}
-		if (len >= 49) {
+		if (len >= IsFaceEnable() ? 37 : 49) {
 			PushLineImpl(line); line.clear();
 			len = 0;
 		}
