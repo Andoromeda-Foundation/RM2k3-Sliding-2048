@@ -38,6 +38,8 @@
 #include "cache.h"
 #include "text.h"
 
+#include "sliding_puzzle.h"
+
 // FIXME: Off by 1 bug in window base class
 constexpr int message_animation_frames = 7;
 constexpr int gold_window_width = 88;
@@ -703,14 +705,20 @@ void Window_Message::UpdateCursorRect() {
 
 void Window_Message::WaitForInput() {
 
-	if (Input::IsTriggered(Input::UP)) {
-		Output::Debug("Up");
-	} else if (Input::IsTriggered(Input::RIGHT)) {
-		Output::Debug("Right");
-	} else if (Input::IsTriggered(Input::DOWN)) {
-		Output::Debug("Down");
-	} else if (Input::IsTriggered(Input::LEFT)) {
-		Output::Debug("Left");
+	if (SlidingPuzzle::On()) {
+		if (Input::IsTriggered(Input::UP)) {
+			SlidingPuzzle::Move(0);
+			Output::Debug("Up");
+		} else if (Input::IsTriggered(Input::RIGHT)) {
+			SlidingPuzzle::Move(1);
+			Output::Debug("Right");
+		} else if (Input::IsTriggered(Input::DOWN)) {
+			SlidingPuzzle::Move(2);
+			Output::Debug("Down");
+		} else if (Input::IsTriggered(Input::LEFT)) {
+			SlidingPuzzle::Move(3);
+			Output::Debug("Left");
+		}
 	}
 
 	if (Input::IsTriggered(Input::DECISION) ||

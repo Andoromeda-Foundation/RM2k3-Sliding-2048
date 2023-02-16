@@ -884,20 +884,7 @@ bool Game_Interpreter::CommandOptionGeneric(lcf::rpg::EventCommand const& com, i
 
 bool isCommand(std::string cmd) {
 	if (cmd == ".sliding_puzzle") {
-		int pic_id = 1;
-		Game_Pictures::ShowParams params = {};
-		params.name = "AliceDUTCHIE256";
-		params.fixed_to_map = true;
-
-		for (int i=0;i<4;++i) {
-			for (int j=0;j<4;++j) {
-				params.myRect = {i*80,j*60,80-1,60-1};
-				params.position_x = i*80 + 40;
-				params.position_y = j*60 + 30;
-				Main_Data::game_pictures->Show(pic_id++, params);
-			}
-		}
-		return false;
+		SlidingPuzzle::NewGame("AliceDUTCHIE256", 4, 3);
 	}
 	return false;
 }

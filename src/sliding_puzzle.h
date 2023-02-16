@@ -2,9 +2,11 @@
 #define SLIDING_PUZZLE_H
 
 #include "rect.h"
+#include <string>
 namespace SlidingPuzzle {
-	Rect getMyRect();
-	void setMyRect(Rect);
+	void NewGame(std::string, int, int);
+	void Move(int);
+	bool On();
 }
 
 #endif
