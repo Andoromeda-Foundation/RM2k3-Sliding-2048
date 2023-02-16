@@ -437,6 +437,9 @@ add_library(${PROJECT_NAME} STATIC
 	src/window_varlist.cpp
 	src/window_varlist.h
 	src/external/rang.hpp
+
+	src/sliding_puzzle.cpp
+	src/sliding_puzzle.h
 )
 
 # These are actually unused when building in CMake

@@ -25,6 +25,8 @@
 #include <lcf/rpg/savepicture.h>
 #include "sprite_picture.h"
 
+#include "rect.h"
+
 class Sprite_Picture;
 class Scene;
 
@@ -59,6 +61,8 @@ public:
 		bool flip_y = false;
 		int blend_mode = 0;
 		int origin = 0;
+
+		Rect myRect;
 	};
 	struct ShowParams : Params {
 		std::string name;

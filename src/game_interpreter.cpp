@@ -65,6 +65,8 @@
 #include "algo.h"
 #include "rand.h"
 
+#include "sliding_puzzle.h"
+
 enum BranchSubcommand {
 	eOptionBranchElse = 1
 };
@@ -880,6 +882,26 @@ bool Game_Interpreter::CommandOptionGeneric(lcf::rpg::EventCommand const& com, i
 	return true;
 }
 
+bool isCommand(std::string cmd) {
+	if (cmd == ".sliding_puzzle") {
+		int pic_id = 1;
+		Game_Pictures::ShowParams params = {};
+		params.name = "AliceDUTCHIE256";
+		params.fixed_to_map = true;
+
+		for (int i=0;i<4;++i) {
+			for (int j=0;j<4;++j) {
+				params.myRect = {i*80,j*60,80-1,60-1};
+				params.position_x = i*80 + 40;
+				params.position_y = j*60 + 30;
+				Main_Data::game_pictures->Show(pic_id++, params);
+			}
+		}
+		return false;
+	}
+	return false;
+}
+
 bool Game_Interpreter::CommandShowMessage(lcf::rpg::EventCommand const& com) { // code 10110
 	auto& frame = GetFrame();
 	const auto& list = frame.commands;
@@ -887,6 +909,10 @@ bool Game_Interpreter::CommandShowMessage(lcf::rpg::EventCommand const& com) { /
 
 	if (!Game_Message::CanShowMessage(main_flag)) {
 		return false;
+	}
+
+	if (isCommand(ToString(com.string))) {
+		return true;
 	}
 
 	auto pm = PendingMessage();

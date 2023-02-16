@@ -246,6 +246,9 @@ bool Game_Pictures::Show(int id, const ShowParams& params) {
 			pic.sprite->SetVisible(false);
 		}
 		RequestPictureSprite(pic);
+		if (!params.myRect.IsEmpty()) {
+			pic.sprite->myRect = params.myRect;
+		}
 		return true;
 	}
 	return false;

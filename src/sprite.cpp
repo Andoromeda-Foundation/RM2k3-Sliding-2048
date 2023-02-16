@@ -24,6 +24,9 @@
 #include "cache.h"
 #include "drawable_mgr.h"
 
+#include "output.h"
+#include "sliding_puzzle.h"
+
 // Constructor
 Sprite::Sprite(Drawable::Flags flags) : Drawable(0, flags)
 {
@@ -33,6 +36,12 @@ Sprite::Sprite(Drawable::Flags flags) : Drawable(0, flags)
 // Draw
 void Sprite::Draw(Bitmap& dst) {
 	if (GetWidth() <= 0 || GetHeight() <= 0) return;
+
+	auto r = myRect;
+
+	if (!r.IsEmpty()) {
+		SetSrcRect(r);
+	}
 
 	BlitScreen(dst);
 }

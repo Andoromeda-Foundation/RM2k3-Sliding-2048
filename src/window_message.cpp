@@ -702,6 +702,17 @@ void Window_Message::UpdateCursorRect() {
 }
 
 void Window_Message::WaitForInput() {
+
+	if (Input::IsTriggered(Input::UP)) {
+		Output::Debug("Up");
+	} else if (Input::IsTriggered(Input::RIGHT)) {
+		Output::Debug("Right");
+	} else if (Input::IsTriggered(Input::DOWN)) {
+		Output::Debug("Down");
+	} else if (Input::IsTriggered(Input::LEFT)) {
+		Output::Debug("Left");
+	}
+
 	if (Input::IsTriggered(Input::DECISION) ||
 			Input::IsTriggered(Input::CANCEL) ||
 			Input::IsRawKeyPressed(Input::Keys::LCTRL)) {

@@ -102,6 +102,7 @@ public:
 	 */
 	void SetFlashEffect(const Color &color);
 
+	Rect myRect;
 private:
 	BitmapRef bitmap;
 
