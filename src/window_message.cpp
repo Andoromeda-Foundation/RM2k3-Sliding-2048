@@ -705,26 +705,6 @@ void Window_Message::UpdateCursorRect() {
 
 void Window_Message::WaitForInput() {
 
-	if (SlidingPuzzle::On()) {
-		if (Input::IsTriggered(Input::UP)) {
-			SlidingPuzzle::Move(0);
-			Output::Debug("Up");
-		} else if (Input::IsTriggered(Input::RIGHT)) {
-			SlidingPuzzle::Move(1);
-			Output::Debug("Right");
-		} else if (Input::IsTriggered(Input::DOWN)) {
-			SlidingPuzzle::Move(2);
-			Output::Debug("Down");
-		} else if (Input::IsTriggered(Input::LEFT)) {
-			SlidingPuzzle::Move(3);
-			Output::Debug("Left");
-		}
-		if (Input::IsTriggered(Input::CANCEL)) {
-			SlidingPuzzle::LeaveGame();
-			SetPause(false);
-		}
-	}
-
 	if (Input::IsTriggered(Input::DECISION) ||
 			Input::IsTriggered(Input::CANCEL) ||
 			Input::IsRawKeyPressed(Input::Keys::LCTRL)) {

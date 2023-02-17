@@ -66,6 +66,7 @@ namespace SlidingPuzzle {
 			Main_Data::game_pictures->Erase(i+1);
 		}
 		w = 0; h = 0; p.clear();
+		Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
 	}
 
 	void Move(int d) {

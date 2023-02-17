@@ -885,6 +885,11 @@ bool Game_Interpreter::CommandOptionGeneric(lcf::rpg::EventCommand const& com, i
 bool isCommand(std::string cmd) {
 	if (cmd == ".sliding_puzzle") {
 		SlidingPuzzle::NewGame("AliceDUTCHIE256", 4, 3);
+		auto pm = PendingMessage();
+		pm.PushLine("Puzzle");
+		pm.SetIsEventMessage(true);
+		Game_Message::SetPendingMessage(std::move(pm));
+		return true;
 	}
 	return false;
 }

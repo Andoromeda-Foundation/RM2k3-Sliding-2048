@@ -34,6 +34,9 @@
 
 #include <cctype>
 
+#include "input.h"
+#include "sliding_puzzle.h"
+
 static Window_Message* window = nullptr;
 
 void Game_Message::SetWindow(Window_Message* w) {
@@ -125,6 +128,30 @@ int Game_Message::WordWrap(StringView line, const int limit, const WordWrapCallb
 }
 
 AsyncOp Game_Message::Update() {
+
+	if (SlidingPuzzle::On()) {
+
+		if (Input::IsTriggered(Input::UP)) {
+			SlidingPuzzle::Move(0);
+			Output::Debug("Up");
+		} else if (Input::IsTriggered(Input::RIGHT)) {
+			SlidingPuzzle::Move(1);
+			Output::Debug("Right");
+		} else if (Input::IsTriggered(Input::DOWN)) {
+			SlidingPuzzle::Move(2);
+			Output::Debug("Down");
+		} else if (Input::IsTriggered(Input::LEFT)) {
+			SlidingPuzzle::Move(3);
+			Output::Debug("Left");
+		}
+		if (Input::IsTriggered(Input::CANCEL)) {
+			SlidingPuzzle::LeaveGame();
+			window->FinishMessageProcessing();
+			//SetPause(false);
+		}
+		return {};
+	}
+
 	if (window) {
 		window->Update();
 		return window->GetAsyncOp();
