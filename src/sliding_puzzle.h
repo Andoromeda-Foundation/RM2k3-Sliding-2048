@@ -5,6 +5,7 @@
 #include <string>
 namespace SlidingPuzzle {
 	void NewGame(std::string, int, int);
+	void LeaveGame();
 	void Move(int);
 	bool On();
 }

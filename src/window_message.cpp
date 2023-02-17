@@ -719,6 +719,9 @@ void Window_Message::WaitForInput() {
 			SlidingPuzzle::Move(3);
 			Output::Debug("Left");
 		}
+		if (Input::IsTriggered(Input::CANCEL)) {
+			SlidingPuzzle::LeaveGame();
+		}
 	}
 
 	if (Input::IsTriggered(Input::DECISION) ||

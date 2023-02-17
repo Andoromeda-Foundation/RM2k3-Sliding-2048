@@ -39,10 +39,6 @@ namespace SlidingPuzzle {
 		return z;
 	}
 
-
-
-
-
 	void NewGame(string _name, int _w, int _h) {
 		name = _name; w = _w; h = _h; w0 = 320 / w, h0 = 240 / h;
 		int id = 0;
@@ -64,11 +60,33 @@ namespace SlidingPuzzle {
 		}
 	}
 
+	void LeaveGame() {
+		for (int i=0;i<w*h;++i) {
+			Main_Data::game_pictures->Erase(i+1);
+		}
+		w = 0; h = 0; p.clear();
+	}
+
 	void Move(int d) {
-		Output::Debug("Move: {} {} {}", d, p0, h);
-		if (d == 3) {
+		if (d == 2) {
+			if ((p0+1) % h == 0) {
+				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
+			} else {
+				int t = p[p0+1]; swap(p[p0], p[p0+1]);
+				Main_Data::game_pictures->Move(t+1, getMoveParams(p0));
+				p0+=1;
+			}
+		} else if (d == 0) {
+			if (p0 % h == 0) {
+				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
+			} else {
+				int t = p[p0-1]; swap(p[p0], p[p0-1]);
+				Main_Data::game_pictures->Move(t+1, getMoveParams(p0));
+				p0-=1;
+			}
+		} else if (d == 3) {
 			if (p0 < h) {
-				// Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
+				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
 			} else {
 				int t = p[p0-h]; swap(p[p0], p[p0-h]);
 				Main_Data::game_pictures->Move(t+1, getMoveParams(p0));
@@ -76,12 +94,15 @@ namespace SlidingPuzzle {
 			}
 		} else if (d == 1) {
 			if (p0 + h >= w*h) {
-				// Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
+				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
 			} else {
 				int t = p[p0+h]; swap(p[p0], p[p0+h]);
 				Main_Data::game_pictures->Move(t+1, getMoveParams(p0));
 				p0+=h;
 			}
+		}
+		if (ok()) {
+			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
 		}
 	}
 
