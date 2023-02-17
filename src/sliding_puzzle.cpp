@@ -36,6 +36,7 @@ namespace SlidingPuzzle {
 		int i = id / h, j = id % h;
 		z.position_x = i*w0+w0/2;
 		z.position_y = j*h0+h0/2;
+		z.duration = 1;
 		return z;
 	}
 
@@ -68,7 +69,7 @@ namespace SlidingPuzzle {
 	}
 
 	void Move(int d) {
-		if (d == 2) {
+		if (d == 0) {
 			if ((p0+1) % h == 0) {
 				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
 			} else {
@@ -76,7 +77,7 @@ namespace SlidingPuzzle {
 				Main_Data::game_pictures->Move(t+1, getMoveParams(p0));
 				p0+=1;
 			}
-		} else if (d == 0) {
+		} else if (d == 2) {
 			if (p0 % h == 0) {
 				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
 			} else {
@@ -84,7 +85,7 @@ namespace SlidingPuzzle {
 				Main_Data::game_pictures->Move(t+1, getMoveParams(p0));
 				p0-=1;
 			}
-		} else if (d == 3) {
+		} else if (d == 1) {
 			if (p0 < h) {
 				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
 			} else {
@@ -92,7 +93,7 @@ namespace SlidingPuzzle {
 				Main_Data::game_pictures->Move(t+1, getMoveParams(p0));
 				p0-=h;
 			}
-		} else if (d == 1) {
+		} else if (d == 3) {
 			if (p0 + h >= w*h) {
 				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
 			} else {

@@ -721,6 +721,7 @@ void Window_Message::WaitForInput() {
 		}
 		if (Input::IsTriggered(Input::CANCEL)) {
 			SlidingPuzzle::LeaveGame();
+			SetPause(false);
 		}
 	}
 
