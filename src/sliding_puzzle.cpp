@@ -19,12 +19,12 @@ namespace SlidingPuzzle {
 		return 1;
 	}
 
-	Game_Pictures::ShowParams getShowParams(int id) {
+	Game_Pictures::ShowParams getShowParams(int id, int pos) {
 		Game_Pictures::ShowParams z = {};
 		z.name = name;
 		z.fixed_to_map = true;
 		z.myRect = {p[id]/h*w0,p[id]%h*h0,w0-1,h0-1};
-		int i = id / h, j = id % h;
+		int i = pos / h, j = pos % h;
 		z.position_x = i*w0+w0/2;
 		z.position_y = j*h0+h0/2;
 		return z;
@@ -32,7 +32,7 @@ namespace SlidingPuzzle {
 
 	Game_Pictures::MoveParams getMoveParams(int id) {
 		Game_Pictures::MoveParams z = {};
-		z.myRect = {p[id]/h*w0,p[id]%h*h0,w0-1,h0-1};
+		//z.myRect = {p[id]/h*w0,p[id]%h*h0,w0-1,h0-1};
 		int i = id / h, j = id % h;
 		z.position_x = i*w0+w0/2;
 		z.position_y = j*h0+h0/2;
@@ -48,13 +48,18 @@ namespace SlidingPuzzle {
 		params.fixed_to_map = true;
 		i0 = rand() % (w*h);
 
+		for (int i=0;i<w;++i)
+			for (int j=0;j<h;++j)
+				p.push_back(id++);
+		std::random_shuffle(p.begin(), p.end());
+
+		id = 0;
 		for (int i=0;i<w;++i) {
 			for (int j=0;j<h;++j) {
-				p.push_back(id);
-				if (id == i0) {
+				if (p[id] == i0) {
 					p0 = id;
 				} else {
-					Main_Data::game_pictures->Show(id+1, getShowParams(id));
+					Main_Data::game_pictures->Show(p[id]+1, getShowParams(p[id], id));
 				}
 				++id;
 			}
@@ -104,7 +109,14 @@ namespace SlidingPuzzle {
 			}
 		}
 		if (ok()) {
-			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
+			lcf::rpg::Sound sound;
+			sound.name = "Key";
+			sound.volume = 100;
+			sound.tempo = 100;
+			sound.balance = 50;
+
+			Main_Data::game_system->SePlay(sound);
+			//Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
 		}
 	}
 
