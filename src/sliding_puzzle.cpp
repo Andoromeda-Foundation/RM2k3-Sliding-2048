@@ -6,6 +6,7 @@
 #include "output.h"
 #include "rect.h"
 #include <vector>
+#include <set>
 #include <cstdlib>
 
 
@@ -133,11 +134,11 @@ namespace SlidingPuzzle2048 {
 
 	int w, h, wh, w0, h0;
 
-	Game_Pictures::ShowParams getShowParams(int pos, int level) {
+	Game_Pictures::ShowParams getShowParams(int pos, int lv) {
 		Game_Pictures::ShowParams z = {};
 		z.name = "2048";
 		z.fixed_to_map = true;
-		z.myRect = {0,(level-1)*32,32,32};
+		z.myRect = {0,(lv-1)*32,32,32};
 		int i = pos / 4, j = pos % 4;
 		z.position_x = i*32+16;
 		z.position_y = j*32+16;
@@ -146,12 +147,22 @@ namespace SlidingPuzzle2048 {
 
 	Game_Pictures::MoveParams getMoveParams(int pos) {
 		Game_Pictures::MoveParams z = {};
-		//z.myRect = {p[id]/h*w0,p[id]%h*h0,w0-1,h0-1};
 		int i = pos / h, j = pos % h;
 		z.position_x = i*w0+w0/2;
 		z.position_y = j*h0+h0/2;
 		z.duration = 1;
 		return z;
+	}
+
+	void NewTile() {
+		set<int> s; for (int i=1;i<=wh;++i) s.insert(i);
+		vector<int> t; for (int i=0;i<wh;++i) if (!id[i]) t.push_back(i); else s.erase(id[i]);
+		if (t.empty()) return;
+		int r = rand() % t.size();
+		int i = t[r];
+		id[i] = *s.begin();
+		lv[i] = 1;
+		Main_Data::game_pictures->Show(id[i], getShowParams(i, lv[i]));
 	}
 
 	void NewGame() {
@@ -165,7 +176,7 @@ namespace SlidingPuzzle2048 {
 		for (int i=0;i<w;++i) {
 			for (int j=0;j<h;++j) {
 				if (id[ii]) {
-					Main_Data::game_pictures->Show(id[ii], getShowParams(ii, 1));
+					Main_Data::game_pictures->Show(id[ii], getShowParams(ii, lv[ii]));
 				}
 				++ii;
 			}
@@ -194,61 +205,40 @@ namespace SlidingPuzzle2048 {
 		return 0 <= x && x < w && 0 <= y && y < h;
 	}
 
-	bool canMove(int dx, int dy) {
-		if (dx < 0 || dy < 0) {
-			for (int x=0;x<w;++x) {
-				for (int y=0;y<h;++y) {
-					int i = x*h+y; if (!id[i]) continue;
-					int xx = x + dx, yy = y + dy;
-					if (!isInside(xx, yy)) continue;
-					// Output::Debug("id: {} {} {}", xx, yy, xx*h+yy);
-					if (id[xx*h+yy] == 0) return 1;
-				}
-			}
-		} else {
-			for (int x=w-1;x>=0;--x) {
-				for (int y=h-1;y>=0;--y) {
-					int i = x*h+y; if (!id[i]) continue;
-					int xx = x + dx, yy = y + dy;
-					if (!isInside(xx, yy)) continue;
-					if (id[xx*h+yy] == 0) return 1;
-				}
-			}
-		}
-		return 0;
-	}
-
 	void Move(int dx, int dy) {
-		if (!canMove(dx, dy)) {
-			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
-			return;
+		bool ok = false;
+		int x0 = 0, x1 = w, xd = 1, y0 = 0, y1 = h, yd = 1;
+		if (dx < 0) x0 = w-1, x1 = -1, xd = -1;
+		if (dy < 0) y0 = h-1, y1 = -1, yd = -1;
+
+		for (int x=x0;x!=x1;x+=xd) {
+			for (int y=y0;y!=y1;y+=yd) {
+				int i = x*h+y; if (!id[i]) continue;
+				int i0 = i, lv0 = lv[i];
+				int xx = x + dx, yy = y + dy, ii = xx*h+yy;
+				while (isInside(xx, yy) && (!id[ii] || lv[ii] == lv[i])) {
+					if (lv[i] == lv[ii]) {
+						Main_Data::game_pictures->Erase(id[ii]);
+						id[ii] = id[i]; lv[ii] += 1; id[i] = lv[i] = 0;
+						i = ii; xx += dx; yy += dy; ii = xx*h+yy;
+					} else {
+						swap(id[i], id[ii]); swap(lv[i], lv[ii]);
+						i = ii; xx += dx; yy += dy; ii = xx*h+yy;
+					}
+				}
+				if (i != i0) {
+					if (lv[i] != lv0) Main_Data::game_pictures->Show(id[i], getShowParams(i0, lv[i]));
+					Main_Data::game_pictures->Move(id[i], getMoveParams(i));
+					ok = true;
+				}
+			}
 		}
 
-		Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
-		if (dx < 0 || dy < 0) {
-			for (int x=0;x<w;++x) {
-				for (int y=0;y<h;++y) {
-					int i = x*h+y; if (!id[i]) continue;
-					int xx = x + dx, yy = y + dy, ii = xx*h+yy;
-					while (isInside(xx, yy) && !id[ii]) {
-						swap(id[i], id[ii]); swap(lv[i], lv[ii]);
-						i = ii; xx += dx; yy += dy; ii = xx*h+yy;
-					}
-					if (i != x*h+y) Main_Data::game_pictures->Move(id[i], getMoveParams(i));
-				}
-			}
+		if (ok) {
+			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
+			NewTile();
 		} else {
-			for (int x=w-1;x>=0;--x) {
-				for (int y=h-1;y>=0;--y) {
-					int i = x*h+y; if (!id[i]) continue;
-					int xx = x + dx, yy = y + dy, ii = xx*h+yy;
-					while (isInside(xx, yy) && !id[ii]) {
-						swap(id[i], id[ii]); swap(lv[i], lv[ii]);
-						i = ii; xx += dx; yy += dy; ii = xx*h+yy;
-					}
-					if (i != x*h+y) Main_Data::game_pictures->Move(id[i], getMoveParams(i));
-				}
-			}
+			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
 		}
 	}
 
