@@ -129,6 +129,14 @@ int Game_Message::WordWrap(StringView line, const int limit, const WordWrapCallb
 
 AsyncOp Game_Message::Update() {
 
+	if (SlidingPuzzle2048::On()) {
+		SlidingPuzzle2048::Update();
+		if (!SlidingPuzzle2048::On()) {
+			window->FinishMessageProcessing();
+		}
+		return {};
+	}
+
 	if (SlidingPuzzle::On()) {
 
 		if (Input::IsTriggered(Input::UP)) {
