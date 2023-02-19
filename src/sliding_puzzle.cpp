@@ -220,7 +220,7 @@ namespace SlidingPuzzle2048 {
 					if (lv[i] == lv[ii]) {
 						Main_Data::game_pictures->Erase(id[ii]);
 						id[ii] = id[i]; lv[ii] += 1; id[i] = lv[i] = 0;
-						i = ii; xx += dx; yy += dy; ii = xx*h+yy;
+						i = ii; break;
 					} else {
 						swap(id[i], id[ii]); swap(lv[i], lv[ii]);
 						i = ii; xx += dx; yy += dy; ii = xx*h+yy;
