@@ -209,8 +209,8 @@ namespace SlidingPuzzle2048 {
 	void Move(int dx, int dy) {
 		bool ok = false;
 		int x0 = 0, x1 = w, xd = 1, y0 = 0, y1 = h, yd = 1;
-		if (dx < 0) x0 = w-1, x1 = -1, xd = -1;
-		if (dy < 0) y0 = h-1, y1 = -1, yd = -1;
+		if (dx > 0) x0 = w-1, x1 = -1, xd = -1;
+		if (dy > 0) y0 = h-1, y1 = -1, yd = -1;
 
 		for (int x=x0;x!=x1;x+=xd) {
 			for (int y=y0;y!=y1;y+=yd) {
