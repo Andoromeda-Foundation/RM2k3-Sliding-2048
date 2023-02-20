@@ -134,11 +134,12 @@ namespace SlidingPuzzle2048 {
 
 	int w, h, wh, w0, h0;
 
-	Game_Pictures::ShowParams getShowParams(int pos, int lv) {
+	Game_Pictures::ShowParams getShowParams(int pos, int lv, bool merge = false) {
 		Game_Pictures::ShowParams z = {};
 		z.name = "2048";
 		z.fixed_to_map = true;
 		z.myRect = {0,(lv-1)*32,32,32};
+		z.magnify = merge ? 161 : 0;
 		int i = pos / 4, j = pos % 4;
 		z.position_x = i*32+16+i*4+4;
 		z.position_y = j*32+16+j*4+4;
@@ -151,6 +152,7 @@ namespace SlidingPuzzle2048 {
 		z.position_x = i*w0+w0/2+i*4+4;
 		z.position_y = j*h0+h0/2+j*4+4;
 		z.duration = 1;
+		z.magnify = 100;
 		return z;
 	}
 
@@ -163,14 +165,11 @@ namespace SlidingPuzzle2048 {
 		id[i] = *s.begin();
 		lv[i] = 1;
 		Main_Data::game_pictures->Show(id[i], getShowParams(i, lv[i]));
+		Main_Data::game_pictures->Move(id[i], getMoveParams(i));
 	}
 
 	void NewGame() {
 		w = h = 4; w0 = h0 = 32; wh = w*h; id.resize(wh); lv.resize(wh);
-		int r1 = rand() % wh, r2 = rand() % (wh-1);
-		if (r2 >= r1) ++r2;
-		id[r1] = 1; lv[r1] = 1;
-		id[r2] = 2; lv[r2] = 1;
 
 		Game_Pictures::ShowParams background = {};
 		background.name = "background";
@@ -180,15 +179,7 @@ namespace SlidingPuzzle2048 {
 		background.map_layer = 6;
 		Main_Data::game_pictures->Show(wh+1, background);
 
-		int ii = 0;
-		for (int i=0;i<w;++i) {
-			for (int j=0;j<h;++j) {
-				if (id[ii]) {
-					Main_Data::game_pictures->Show(id[ii], getShowParams(ii, lv[ii]));
-				}
-				++ii;
-			}
-		}
+		NewTile(); NewTile();
 	}
 
 	void LeaveGame() {
@@ -237,7 +228,7 @@ namespace SlidingPuzzle2048 {
 					}
 				}
 				if (i != i0) {
-					if (lv[i] != lv0) Main_Data::game_pictures->Show(id[i], getShowParams(i0, lv[i]));
+					if (lv[i] != lv0) Main_Data::game_pictures->Show(id[i], getShowParams(i0, lv[i], 1));
 					Main_Data::game_pictures->Move(id[i], getMoveParams(i));
 					ok = true;
 				}
