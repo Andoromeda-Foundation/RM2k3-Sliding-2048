@@ -140,16 +140,16 @@ namespace SlidingPuzzle2048 {
 		z.fixed_to_map = true;
 		z.myRect = {0,(lv-1)*32,32,32};
 		int i = pos / 4, j = pos % 4;
-		z.position_x = i*32+16;
-		z.position_y = j*32+16;
+		z.position_x = i*32+16+i*4+4;
+		z.position_y = j*32+16+j*4+4;
 		return z;
 	}
 
 	Game_Pictures::MoveParams getMoveParams(int pos) {
 		Game_Pictures::MoveParams z = {};
 		int i = pos / h, j = pos % h;
-		z.position_x = i*w0+w0/2;
-		z.position_y = j*h0+h0/2;
+		z.position_x = i*w0+w0/2+i*4+4;
+		z.position_y = j*h0+h0/2+j*4+4;
 		z.duration = 1;
 		return z;
 	}
@@ -172,6 +172,14 @@ namespace SlidingPuzzle2048 {
 		id[r1] = 1; lv[r1] = 1;
 		id[r2] = 2; lv[r2] = 1;
 
+		Game_Pictures::ShowParams background = {};
+		background.name = "background";
+		background.fixed_to_map = true;
+		background.position_x = 74;
+		background.position_y = 74;
+		background.map_layer = 6;
+		Main_Data::game_pictures->Show(wh+1, background);
+
 		int ii = 0;
 		for (int i=0;i<w;++i) {
 			for (int j=0;j<h;++j) {
@@ -189,6 +197,8 @@ namespace SlidingPuzzle2048 {
 				Main_Data::game_pictures->Erase(id[i]);
 			}
 		}
+		Main_Data::game_pictures->Erase(w*h+1);
+
 		id.clear(); lv.clear();
 		//Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
 
