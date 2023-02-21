@@ -884,7 +884,7 @@ bool Game_Interpreter::CommandOptionGeneric(lcf::rpg::EventCommand const& com, i
 
 bool isCommand(std::string cmd) {
 	if (cmd == ".sliding_puzzle") {
-		SlidingPuzzle2048::NewGame();
+		TowerOfHanoi::NewGame();
 		auto pm = PendingMessage();
 		pm.PushLine("Puzzle");
 		pm.SetIsEventMessage(true);

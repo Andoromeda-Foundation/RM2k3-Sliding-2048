@@ -129,9 +129,9 @@ int Game_Message::WordWrap(StringView line, const int limit, const WordWrapCallb
 
 AsyncOp Game_Message::Update() {
 
-	if (SlidingPuzzle2048::On()) {
-		SlidingPuzzle2048::Update();
-		if (!SlidingPuzzle2048::On()) {
+	if (TowerOfHanoi::On()) {
+		TowerOfHanoi::Update();
+		if (!TowerOfHanoi::On()) {
 			window->FinishMessageProcessing();
 		}
 		return {};

@@ -18,4 +18,13 @@ namespace SlidingPuzzle2048 {
 	bool On();
 }
 
+namespace TowerOfHanoi {
+	void NewGame();
+	void LeaveGame();
+	void Update();
+	void Pop();
+	void Move();
+	void Push();
+	bool On();
+}
 #endif
