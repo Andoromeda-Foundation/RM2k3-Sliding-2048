@@ -137,8 +137,23 @@ AsyncOp Game_Message::Update() {
 		return {};
 	}
 
-	if (SlidingPuzzle::On()) {
+	if (SlidingPuzzle2048::On()) {
+		SlidingPuzzle2048::Update();
+		if (!SlidingPuzzle2048::On()) {
+			window->FinishMessageProcessing();
+		}
+		return {};
+	}
 
+	if (MineSweeper::On()) {
+		MineSweeper::Update();
+		if (!MineSweeper::On()) {
+			window->FinishMessageProcessing();
+		}
+		return {};
+	}
+
+	if (SlidingPuzzle::On()) {
 		if (Input::IsTriggered(Input::UP)) {
 			SlidingPuzzle::Move(0);
 			Output::Debug("Up");
@@ -155,7 +170,6 @@ AsyncOp Game_Message::Update() {
 		if (Input::IsTriggered(Input::CANCEL)) {
 			SlidingPuzzle::LeaveGame();
 			window->FinishMessageProcessing();
-			//SetPause(false);
 		}
 		return {};
 	}

@@ -9,11 +9,12 @@
 #include <set>
 #include <cstdlib>
 #include <stack>
+#include <numeric>
 
 
 namespace SlidingPuzzle {
 	using namespace std;
-	vector<int> p; int w, h, w0, h0, i0, p0;
+	vector<int> p; int w, h, hw, w0, h0, i0, p0;
 	string name;
 
 	bool ok() {
@@ -45,7 +46,7 @@ namespace SlidingPuzzle {
 	}
 
 	void NewGame(string _name, int _w, int _h) {
-		name = _name; w = _w; h = _h; w0 = 320 / w, h0 = 240 / h;
+		name = _name; w = _w; h = _h; w0 = 320 / w, h0 = 240 / h; hw = h*w;
 		int id = 0;
 		Game_Pictures::ShowParams params = {};
 		params.name = name;
@@ -71,9 +72,7 @@ namespace SlidingPuzzle {
 	}
 
 	void LeaveGame() {
-		for (int i=0;i<w*h;++i) {
-			Main_Data::game_pictures->Erase(i+1);
-		}
+		for (int i=0;i<hw;++i) if (i != p0) Main_Data::game_pictures->Erase(p[i]+1);
 		p.clear();
 		Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
 	}
@@ -144,6 +143,7 @@ namespace SlidingPuzzle2048 {
 		int i = pos / 4, j = pos % 4;
 		z.position_x = i*32+16+i*4+4;
 		z.position_y = j*32+16+j*4+4;
+		// z.map_layer = 123;
 		return z;
 	}
 
@@ -158,7 +158,7 @@ namespace SlidingPuzzle2048 {
 	}
 
 	void NewTile() {
-		set<int> s; for (int i=1;i<=wh;++i) s.insert(i);
+		set<int> s; for (int i=2;i<=wh+1;++i) s.insert(i);
 		vector<int> t; for (int i=0;i<wh;++i) if (!id[i]) t.push_back(i); else s.erase(id[i]);
 		if (t.empty()) return;
 		int r = rand() % t.size();
@@ -177,30 +177,21 @@ namespace SlidingPuzzle2048 {
 		background.fixed_to_map = true;
 		background.position_x = 74;
 		background.position_y = 74;
-		background.map_layer = 6;
-		Main_Data::game_pictures->Show(wh+1, background);
-
+		Main_Data::game_pictures->Show(1, background);
 		NewTile(); NewTile();
 	}
 
 	void LeaveGame() {
-		for (int i=0;i<w*h;++i) {
-			if (id[i]) {
-				Main_Data::game_pictures->Erase(id[i]);
-			}
-		}
-		Main_Data::game_pictures->Erase(w*h+1);
+		for (int i=0;i<wh;++i) if (id[i]) Main_Data::game_pictures->Erase(id[i]);
+		Main_Data::game_pictures->Erase(1);
 
 		id.clear(); lv.clear();
-		//Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Cancel));
-
-			lcf::rpg::Sound sound;
-			sound.name = "Key";
-			sound.volume = 100;
-			sound.tempo = 100;
-			sound.balance = 50;
-
-			Main_Data::game_system->SePlay(sound);
+		lcf::rpg::Sound sound;
+		sound.name = "Key";
+		sound.volume = 100;
+		sound.tempo = 100;
+		sound.balance = 50;
+		Main_Data::game_system->SePlay(sound);
 	}
 
 	bool isInside(int x, int y) {
@@ -247,8 +238,6 @@ namespace SlidingPuzzle2048 {
 	void Update() {
 		if (Input::IsTriggered(Input::CANCEL)) {
 			LeaveGame();
-			//window->FinishMessageProcessing();
-			//SetPause(false);
 		} else if (Input::IsTriggered(Input::LEFT)) {
 			Move(-1, 0);
 		} else if (Input::IsTriggered(Input::RIGHT)) {
@@ -265,118 +254,207 @@ namespace SlidingPuzzle2048 {
 	}
 }
 
-	namespace TowerOfHanoi {
-		using namespace std;
-		vector<stack<int>> p;
-		int pointer, diskid, max;
+namespace TowerOfHanoi {
+	using namespace std;
+	vector<stack<int>> p;
+	int pointer, diskid, max;
 
-		Game_Pictures::ShowParams getShowParams(string name, int pos, int high, int rect, int layer) {
-			Game_Pictures::ShowParams z = {};
-			z.name = name;
-			z.fixed_to_map = true;
-			if(rect) z.myRect = {0,0,rect*4+8,8};
-			z.use_transparent_color = true;
-			z.map_layer = layer;
-			z.position_x = pos*32+8+pos*6;
-			z.position_y = 81-high*8+4+24;
-			return z;
+	Game_Pictures::ShowParams getShowParams(string name, int pos, int high, int rect) {
+		Game_Pictures::ShowParams z = {};
+		z.name = name;
+		z.fixed_to_map = true;
+		if(rect) z.myRect = {0,0,rect*4+8,8};
+		z.use_transparent_color = true;
+		z.position_x = pos*32+8+pos*6;
+		z.position_y = 81-high*8+4+24;
+		return z;
+	}
+
+	Game_Pictures::MoveParams getMoveParams(int pos, int high) {
+		Game_Pictures::MoveParams z = {};
+		z.position_x = pos*32+8+pos*6;
+		z.position_y = 81-high*8+4+24;
+		z.duration = 1;
+		z.magnify = 100;
+		return z;
+	}
+
+	void NewGame() {
+		pointer = 1; diskid = 0; max = 3;
+
+		for (int i = 1; i <= 3; i++) {
+			stack<int> s;
+			p.push_back(s);
+			Main_Data::game_pictures->Show(i, getShowParams("rod", i, 3, 0));
 		}
 
-		Game_Pictures::MoveParams getMoveParams(int pos, int high) {
-			Game_Pictures::MoveParams z = {};
-			z.position_x = pos*32+8+pos*6;
-			z.position_y = 81-high*8+4+24;
-			z.duration = 1;
-			z.magnify = 100;
-			return z;
+		for (int i = max; i > 0; i--) {
+			p[0].push(i);
+			Main_Data::game_pictures->Show(max+i, getShowParams("disk", 1, max+1-i, i));
 		}
 
-		void NewGame() {
-			pointer = 1; diskid = 0; max = 3;
-			Main_Data::game_pictures->Show(max+4, getShowParams("pointer", 1, 9, 0, 7));
 
-			for (int i = 1; i <= 3; i++) {
-				stack<int> s;
-				p.push_back(s);
-				Main_Data::game_pictures->Show(max+i, getShowParams("rod", i, 3, 0, 6));
-			}
+		Main_Data::game_pictures->Show(max+4, getShowParams("pointer", 1, 9, 0));
 
-			for (int i = max; i > 0; i--) {
-				p[0].push(i);
-				Main_Data::game_pictures->Show(i, getShowParams("disk", 1, max+1-i, i, 7));
-			}
-	
-		}
+	}
 
-		void Pop(int pos) {
-			if(!diskid && !p[pos-1].empty()) {
-				diskid = p[pos-1].top();
-				p[pos-1].pop();
-				Main_Data::game_pictures->Move(diskid, getMoveParams(pos, 8));
-				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
-			} else Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
-		}
-
-		void Push(int pos) {
-			if(diskid /*  && p[pos-1].empty()  ||  diskid < p[pos-1].top())*/) {
-				p[pos-1].push(diskid);
-				
-				int h = p[pos-1].size();
-				Main_Data::game_pictures->Move(diskid, getMoveParams(pos, h));
-				Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
-				diskid = 0;
-			} else Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
-		}
-
-		void Move(int pos) {
-			if(diskid) {
-				Main_Data::game_pictures->Move(diskid, getMoveParams(pos, 8));
-			}
-			Main_Data::game_pictures->Move(max+4, getMoveParams(pos, 9));
+	void Pop(int pos) {
+		if(!diskid && !p[pos-1].empty()) {
+			diskid = p[pos-1].top();
+			p[pos-1].pop();
+			Main_Data::game_pictures->Move(max+diskid, getMoveParams(pos, 8));
 			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
+		} else Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
+	}
+
+	void Push(int pos) {
+		if(diskid /*  && p[pos-1].empty()  ||  diskid < p[pos-1].top())*/) {
+			p[pos-1].push(diskid);
+
+			int h = p[pos-1].size();
+			Main_Data::game_pictures->Move(max+diskid, getMoveParams(pos, h));
+			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
+			diskid = 0;
+		} else Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
+	}
+
+	void Move(int pos) {
+		if(diskid) {
+			Main_Data::game_pictures->Move(max+diskid, getMoveParams(pos, 8));
 		}
+		Main_Data::game_pictures->Move(max+4, getMoveParams(pos, 9));
+		Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Decision));
+	}
 
-		void Update() {
-			if (Input::IsTriggered(Input::CANCEL)) {
-				LeaveGame();
-				//window->FinishMessageProcessing();
-				//SetPause(false);
-			} else if (Input::IsTriggered(Input::LEFT)) {
-				if(pointer-1 >= 1) {
-					pointer -= 1;
-					Move(pointer);
-				} else Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
-			} else if (Input::IsTriggered(Input::RIGHT)) {
-				if(pointer+1 <= 3) {
-					pointer += 1;
-					Move(pointer);
-				} else Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
-			} else if (Input::IsTriggered(Input::UP)) {
-				Pop(pointer);
-			} else if (Input::IsTriggered(Input::DOWN)) {
-				Push(pointer);
-			}
-		}
-
-		void LeaveGame() {
-			for (int i = max; i > 0; i--) {
-				Main_Data::game_pictures->Erase(i);
-			}
-			for (int i = 1; i <= 3; i++) {
-				Main_Data::game_pictures->Erase(max+i);
-			}
-
-			p.clear();
-
-			lcf::rpg::Sound sound;
-			sound.name = "Key";
-			sound.volume = 100;
-			sound.tempo = 100;
-			sound.balance = 50;
-			Main_Data::game_system->SePlay(sound);
-		}
-
-		bool On() {
-			return !p.empty();
+	void Update() {
+		if (Input::IsTriggered(Input::CANCEL)) {
+			LeaveGame();
+		} else if (Input::IsTriggered(Input::LEFT)) {
+			if(pointer-1 >= 1) {
+				pointer -= 1;
+				Move(pointer);
+			} else Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
+		} else if (Input::IsTriggered(Input::RIGHT)) {
+			if(pointer+1 <= 3) {
+				pointer += 1;
+				Move(pointer);
+			} else Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
+		} else if (Input::IsTriggered(Input::UP)) {
+			Pop(pointer);
+		} else if (Input::IsTriggered(Input::DOWN)) {
+			Push(pointer);
 		}
 	}
+
+	void LeaveGame() {
+		for (int i = 1; i <= max+4; i++) Main_Data::game_pictures->Erase(i);
+		p.clear();
+
+		lcf::rpg::Sound sound;
+		sound.name = "Key";
+		sound.volume = 100;
+		sound.tempo = 100;
+		sound.balance = 50;
+		Main_Data::game_system->SePlay(sound);
+	}
+
+	bool On() {
+		return !p.empty();
+	}
+}
+
+namespace MineSweeper {
+	using namespace std;
+	vector<bool> mines;
+	int h, w, hw, cx, cy;
+
+	void DrawCell(int x, int y) {
+		int id = x*w+y;
+		Game_Pictures::ShowParams z = {};
+		z.name = "minesweeper";
+		z.fixed_to_map = true;
+		z.magnify = 50;
+		z.myRect = {0,32*10,32,32};
+		z.position_x = x*16+8+x*2+2;
+		z.position_y = y*16+8+y*2+2;
+		Main_Data::game_pictures->Show(id+1, z);
+	}
+
+	void DrawCursor() {
+		int x = cx, y = cy;
+		int id = x*w+y;
+		Game_Pictures::ShowParams z = {};
+		z.name = "minesweeper";
+		z.fixed_to_map = true;
+		z.magnify = 50;
+		z.myRect = {0,32*11,32,32};
+		z.position_x = x*16+8+x*2+2;
+		z.position_y = y*16+8+y*2+2;
+		z.top_trans = 33;
+		z.bottom_trans = 33;
+		Main_Data::game_pictures->Show(hw+1, z);
+	}
+
+	void NewGame() {
+		h = 8; w = 8; hw = h*w; mines.resize(hw);
+		vector<int> t; t.resize(hw);
+		iota(t.begin(),t.end(),0);
+		random_shuffle(t.begin(),t.end());
+		for (int i=0;i<10;++i) mines[t[i]] = 1;
+
+		for (int i=0;i<h;++i) {
+			for (int j=0;j<w;++j) {
+				DrawCell(i, j);
+			}
+		}
+		cx = 4; cy = 4;
+		DrawCursor();
+	}
+
+	void Move(int dx, int dy) {
+		if (!(0 <= cx + dx && cx + dx < w && 0 <= cy + dy && cy + dy < h)) {
+			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
+			return;
+		}
+		cx += dx; cy += dy;
+		int x = cx, y = cy;
+		Game_Pictures::MoveParams z = {};
+		z.magnify = 50;
+		z.position_x = x*16+8+x*2+2;
+		z.position_y = y*16+8+y*2+2;
+		z.top_trans = 33;
+		z.bottom_trans = 33;
+		z.duration = 1;
+		Main_Data::game_pictures->Move(hw+1, z);
+	}
+
+	void LeaveGame() {
+		for (int i=1;i<=hw+1;i++) Main_Data::game_pictures->Erase(i);
+		mines.clear();
+
+		lcf::rpg::Sound sound;
+		sound.name = "Key";
+		sound.volume = 100;
+		sound.tempo = 100;
+		sound.balance = 50;
+		Main_Data::game_system->SePlay(sound);
+	}
+
+	void Update() {
+		if (Input::IsTriggered(Input::CANCEL)) {
+			LeaveGame();
+		} else if (Input::IsTriggered(Input::LEFT)) {
+			Move(-1, 0);
+		} else if (Input::IsTriggered(Input::RIGHT)) {
+			Move(1, 0);
+		} else if (Input::IsTriggered(Input::UP)) {
+			Move(0, -1);
+		} else if (Input::IsTriggered(Input::DOWN)) {
+			Move(0, 1);
+		}
+	}
+
+	bool On() {
+		return !mines.empty();
+	}
+}

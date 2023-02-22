@@ -883,14 +883,37 @@ bool Game_Interpreter::CommandOptionGeneric(lcf::rpg::EventCommand const& com, i
 }
 
 bool isCommand(std::string cmd) {
-	if (cmd == ".sliding_puzzle") {
+	if (cmd == ".towerOfHanoi") {
 		TowerOfHanoi::NewGame();
 		auto pm = PendingMessage();
 		pm.PushLine("Puzzle");
 		pm.SetIsEventMessage(true);
 		Game_Message::SetPendingMessage(std::move(pm));
 		return true;
+	} else if (cmd == ".slidingPuzzle2048") {
+		SlidingPuzzle2048::NewGame();
+		auto pm = PendingMessage();
+		pm.PushLine("Puzzle");
+		pm.SetIsEventMessage(true);
+		Game_Message::SetPendingMessage(std::move(pm));
+		return true;
+	} else if (cmd == ".slidingPuzzle") {
+		SlidingPuzzle::NewGame("AliceDUTCHIE256", 4, 3);
+		auto pm = PendingMessage();
+		pm.PushLine("Puzzle");
+		pm.SetIsEventMessage(true);
+		Game_Message::SetPendingMessage(std::move(pm));
+		return true;
+	} else if (cmd == ".mineSweeper") {
+		MineSweeper::NewGame();
+		auto pm = PendingMessage();
+		pm.PushLine("Puzzle");
+		pm.SetIsEventMessage(true);
+		Game_Message::SetPendingMessage(std::move(pm));
+		return true;
 	}
+
+
 	return false;
 }
 

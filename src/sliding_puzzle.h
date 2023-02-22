@@ -22,9 +22,14 @@ namespace TowerOfHanoi {
 	void NewGame();
 	void LeaveGame();
 	void Update();
-	void Pop();
-	void Move();
-	void Push();
 	bool On();
 }
+
+namespace MineSweeper {
+	void NewGame();
+	void LeaveGame();
+	void Update();
+	bool On();
+}
+
 #endif
