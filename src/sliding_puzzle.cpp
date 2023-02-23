@@ -368,6 +368,7 @@ namespace MineSweeper {
 	vector<bool> opened;
 	vector<bool> marked;
 	vector<bool> mines;
+	bool gameovermark;
 	int h, w, hw, cx, cy;
 	int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
 	int dy[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
@@ -427,7 +428,7 @@ namespace MineSweeper {
 	}
 
 	void NewGame() {
-		h = 8; w = 8; hw = h*w; mines.resize(hw); opened.resize(hw); marked.resize(hw);
+		h = 8; w = 8; hw = h*w; mines.resize(hw); opened.resize(hw); marked.resize(hw); gameovermark = false;
 		vector<int> t; t.resize(hw);
 		iota(t.begin(),t.end(),0);
 		random_shuffle(t.begin(),t.end());
@@ -443,6 +444,7 @@ namespace MineSweeper {
 	}
 
 	void Move(int dx, int dy) {
+		if(gameovermark) return;
 		if (!inGrid(cx+dx, cy+dy)) {
 			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
 			return;
@@ -461,6 +463,7 @@ namespace MineSweeper {
 
 	void LeaveGame() {
 		for (int i=1;i<=hw+1;i++) Main_Data::game_pictures->Erase(i);
+		if(gameovermark) Main_Data::game_pictures->Erase(hw+2);
 		mines.clear(); opened.clear(); marked.clear();
 
 		lcf::rpg::Sound sound;
@@ -472,6 +475,18 @@ namespace MineSweeper {
 	}
 
 	void Open(int x, int y) {
+		if(gameovermark) return;
+		if(mines[x*w+y]) {
+			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_EnemyKill));
+			gameovermark = true;
+			Game_Pictures::ShowParams z = {};
+			z.name = "gameover";
+			z.fixed_to_map = true;
+			z.magnify = 50;
+			z.position_x = (w*16+w*2)/2;
+			z.position_y = (h*16+h*2)/2;
+			Main_Data::game_pictures->Show(hw+2, z);
+		}
 		if (!inGrid(x, y)) return;
 		int id = x*w + y; if (opened[id]) return;
 		opened[id] = true; DrawCell(x, y);
@@ -484,6 +499,7 @@ namespace MineSweeper {
 	}
 
 	void Mark(int x, int y) {
+		if(gameovermark) return;
 		int id = x*w + y;
 		marked[id] = true;
 		DrawCell(x, y);
