@@ -373,6 +373,13 @@ namespace MineSweeper {
 	int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
 	int dy[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
 
+	bool ok() {
+		for(int i=0;i<hw;i++) {
+			if(mines[i]^marked[i]) return false;
+		}
+		return true;
+	}
+
 	bool inGrid(int x, int y) {
 		return 0 <= x && x < h && 0 <= y && y < w;
 	}
@@ -432,7 +439,7 @@ namespace MineSweeper {
 		vector<int> t; t.resize(hw);
 		iota(t.begin(),t.end(),0);
 		random_shuffle(t.begin(),t.end());
-		for (int i=0;i<10;++i) mines[t[i]] = 1;
+		for (int i=0;i<1;++i) mines[t[i]] = 1;
 
 		for (int i=0;i<h;++i) {
 			for (int j=0;j<w;++j) {
@@ -476,6 +483,7 @@ namespace MineSweeper {
 
 	void Open(int x, int y) {
 		if(gameovermark) return;
+		if (!inGrid(x, y)) return;
 		if(mines[x*w+y]) {
 			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_EnemyKill));
 			gameovermark = true;
@@ -487,7 +495,6 @@ namespace MineSweeper {
 			z.position_y = (h*16+h*2)/2;
 			Main_Data::game_pictures->Show(hw+2, z);
 		}
-		if (!inGrid(x, y)) return;
 		int id = x*w + y; if (opened[id]) return;
 		opened[id] = true; DrawCell(x, y);
 		if (!count(x, y)) {
@@ -501,8 +508,15 @@ namespace MineSweeper {
 	void Mark(int x, int y) {
 		if(gameovermark) return;
 		int id = x*w + y;
-		marked[id] = true;
+		if(marked[id] == false)
+			marked[id] = true;
+		else
+			marked[id] = false;
 		DrawCell(x, y);
+		if(ok()) {
+			gameovermark = true;
+			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_UseItem));
+		}
 	}
 
 	void Update() {
