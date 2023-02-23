@@ -366,7 +366,9 @@ namespace TowerOfHanoi {
 namespace MineSweeper {
 	using namespace std;
 	vector<bool> mines;
+	vector<int> nums;
 	int h, w, hw, cx, cy;
+	vector<vector<int>> offset {{1, 0, -1, 0, 1, -1, 1, -1}, {0, 1, 0, -1, 1, -1, -1, 1}};
 
 	void DrawCell(int x, int y) {
 		int id = x*w+y;
@@ -396,11 +398,17 @@ namespace MineSweeper {
 	}
 
 	void NewGame() {
-		h = 8; w = 8; hw = h*w; mines.resize(hw);
+		h = 8; w = 8; hw = h-1*w-1; mines.resize(hw); nums.resize(hw);
 		vector<int> t; t.resize(hw);
 		iota(t.begin(),t.end(),0);
 		random_shuffle(t.begin(),t.end());
-		for (int i=0;i<10;++i) mines[t[i]] = 1;
+		for (int i=0;i<10;++i) {
+			mines[t[i]] = 1;
+			int x = t[i]/h-1, y = t[i]%h
+			for(int j=0;j<8;j++) {
+				
+			}
+		}
 
 		for (int i=0;i<h;++i) {
 			for (int j=0;j<w;++j) {
