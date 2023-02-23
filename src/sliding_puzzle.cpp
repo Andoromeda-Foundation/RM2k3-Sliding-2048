@@ -365,10 +365,26 @@ namespace TowerOfHanoi {
 
 namespace MineSweeper {
 	using namespace std;
+	vector<bool> opened;
+	vector<bool> marked;
 	vector<bool> mines;
-	vector<int> nums;
 	int h, w, hw, cx, cy;
-	vector<vector<int>> offset {{1, 0, -1, 0, 1, -1, 1, -1}, {0, 1, 0, -1, 1, -1, -1, 1}};
+	int dx[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
+	int dy[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+
+	bool inGrid(int x, int y) {
+		return 0 <= x && x < h && 0 <= y && y < w;
+	}
+
+	int count(int x, int y) {
+		int z = 0;
+		for (int i=0;i<8;++i) {
+			int xx = x + dx[i], yy = y + dy[i];
+			if (!inGrid(xx, yy)) continue;
+			if (mines[xx*w+yy]) ++z;
+		}
+		return z;
+	}
 
 	void DrawCell(int x, int y) {
 		int id = x*w+y;
@@ -376,9 +392,22 @@ namespace MineSweeper {
 		z.name = "minesweeper";
 		z.fixed_to_map = true;
 		z.magnify = 50;
-		z.myRect = {0,32*10,32,32};
 		z.position_x = x*16+8+x*2+2;
 		z.position_y = y*16+8+y*2+2;
+		if (opened[id]) {
+			if (mines[id]) {
+				z.myRect = {0,32*10,32,32};
+			} else {
+				int c = count(x, y);
+				z.myRect = {0,32*c,32,32};
+			}
+		} else {
+			if (marked[id]) {
+				z.myRect = {0,32*11,32,32};
+			} else {
+				z.myRect = {0,32*9,32,32};
+			}
+		}
 		Main_Data::game_pictures->Show(id+1, z);
 	}
 
@@ -387,28 +416,22 @@ namespace MineSweeper {
 		int id = x*w+y;
 		Game_Pictures::ShowParams z = {};
 		z.name = "minesweeper";
-		z.fixed_to_map = true;
-		z.magnify = 50;
-		z.myRect = {0,32*11,32,32};
 		z.position_x = x*16+8+x*2+2;
 		z.position_y = y*16+8+y*2+2;
+		z.fixed_to_map = true;
+		z.magnify = 50;
+		z.myRect = {0,32*12,32,32};
 		z.top_trans = 33;
 		z.bottom_trans = 33;
 		Main_Data::game_pictures->Show(hw+1, z);
 	}
 
 	void NewGame() {
-		h = 8; w = 8; hw = h-1*w-1; mines.resize(hw); nums.resize(hw);
+		h = 8; w = 8; hw = h*w; mines.resize(hw); opened.resize(hw); marked.resize(hw);
 		vector<int> t; t.resize(hw);
 		iota(t.begin(),t.end(),0);
 		random_shuffle(t.begin(),t.end());
-		for (int i=0;i<10;++i) {
-			mines[t[i]] = 1;
-			int x = t[i]/h-1, y = t[i]%h
-			for(int j=0;j<8;j++) {
-				
-			}
-		}
+		for (int i=0;i<10;++i) mines[t[i]] = 1;
 
 		for (int i=0;i<h;++i) {
 			for (int j=0;j<w;++j) {
@@ -420,7 +443,7 @@ namespace MineSweeper {
 	}
 
 	void Move(int dx, int dy) {
-		if (!(0 <= cx + dx && cx + dx < w && 0 <= cy + dy && cy + dy < h)) {
+		if (!inGrid(cx+dx, cy+dy)) {
 			Main_Data::game_system->SePlay(Main_Data::game_system->GetSystemSE(Main_Data::game_system->SFX_Buzzer));
 			return;
 		}
@@ -438,7 +461,7 @@ namespace MineSweeper {
 
 	void LeaveGame() {
 		for (int i=1;i<=hw+1;i++) Main_Data::game_pictures->Erase(i);
-		mines.clear();
+		mines.clear(); opened.clear(); marked.clear();
 
 		lcf::rpg::Sound sound;
 		sound.name = "Key";
@@ -446,6 +469,24 @@ namespace MineSweeper {
 		sound.tempo = 100;
 		sound.balance = 50;
 		Main_Data::game_system->SePlay(sound);
+	}
+
+	void Open(int x, int y) {
+		if (!inGrid(x, y)) return;
+		int id = x*w + y; if (opened[id]) return;
+		opened[id] = true; DrawCell(x, y);
+		if (!count(x, y)) {
+			Open(x+1, y);
+			Open(x, y+1);
+			Open(x-1, y);
+			Open(x, y-1);
+		}
+	}
+
+	void Mark(int x, int y) {
+		int id = x*w + y;
+		marked[id] = true;
+		DrawCell(x, y);
 	}
 
 	void Update() {
@@ -459,6 +500,10 @@ namespace MineSweeper {
 			Move(0, -1);
 		} else if (Input::IsTriggered(Input::DOWN)) {
 			Move(0, 1);
+		} else if (Input::IsRawKeyPressed(Input::Keys::SPACE)) {
+			Open(cx, cy);
+		} else if (Input::IsTriggered(Input::DECISION)) {
+			Mark(cx, cy);
 		}
 	}
 
