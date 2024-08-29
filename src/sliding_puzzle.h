@@ -6,7 +6,7 @@
 namespace SlidingPuzzle {
 	void NewGame(std::string, int, int);
 	void LeaveGame();
-	void Move(int);
+	void Update();
 	bool On();
 }
 
@@ -14,7 +14,6 @@ namespace SlidingPuzzle2048 {
 	void NewGame();
 	void LeaveGame();
 	void Update();
-	void Move(int);
 	bool On();
 }
 

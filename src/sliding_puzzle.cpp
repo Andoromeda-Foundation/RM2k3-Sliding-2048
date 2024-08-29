@@ -123,6 +123,20 @@ namespace SlidingPuzzle {
 		}
 	}
 
+	void Update() {
+		if (Input::IsTriggered(Input::UP)) {
+			Move(0);
+		} else if (Input::IsTriggered(Input::RIGHT)) {
+			Move(1);
+		} else if (Input::IsTriggered(Input::DOWN)) {
+			Move(2);
+		} else if (Input::IsTriggered(Input::LEFT)) {
+			Move(3);
+		} else if (Input::IsTriggered(Input::CANCEL)) {
+			LeaveGame();
+		}
+	}
+
 	bool On() {
 		return !p.empty();
 	}
@@ -439,7 +453,7 @@ namespace MineSweeper {
 		vector<int> t; t.resize(hw);
 		iota(t.begin(),t.end(),0);
 		random_shuffle(t.begin(),t.end());
-		for (int i=0;i<1;++i) mines[t[i]] = 1;
+		for (int i=0;i<10;++i) mines[t[i]] = 1;
 
 		for (int i=0;i<h;++i) {
 			for (int j=0;j<w;++j) {
@@ -496,7 +510,7 @@ namespace MineSweeper {
 			Main_Data::game_pictures->Show(hw+2, z);
 		}
 		int id = x*w + y; if (opened[id]) return;
-		opened[id] = true; DrawCell(x, y);
+		opened[id] = true; marked[id] = false; DrawCell(x, y);
 		if (!count(x, y)) {
 			Open(x+1, y);
 			Open(x, y+1);
